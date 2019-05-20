@@ -1,7 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SelectAnswers from '../containers/SelectAnswers';
-import { INTERNAL_MAPPING_DEFAULT_SOURCE, MAP_TYPE } from './helperFunction';
+import {
+  INTERNAL_MAPPING_DEFAULT_SOURCE,
+  KEY_CODE_FOR_ENTER,
+  KEY_CODE_FOR_ESCAPE,
+} from './helperFunction';
+import { MIN_CHARACTERS_WARNING, MILLISECONDS_TO_SHOW_WARNING } from '../../../redux/reducers/generalSearchReducer';
+import { notify } from 'react-notify-toast';
+import { queryAnswers } from '../../../redux/actions/concepts/dictionaryConcepts';
 
 
 class AnswerRow extends React.Component {
@@ -10,7 +17,12 @@ class AnswerRow extends React.Component {
     const DEFAULT_SOURCE = localStorage.getItem('dictionaryId');
     this.state = {
       source: DEFAULT_SOURCE,
+      sourceClicked: false,
+      inputValue: '',
+      options: [],
+      isVisible: false,
       isClicked: false,
+      hasReset: false,
     };
   }
 
@@ -18,8 +30,65 @@ class AnswerRow extends React.Component {
     this.setState({
       isEditing: this.props.isEditConcept,
       isPrePopulated: this.props.prePopulated,
+      inputValue: this.props.toConceptName 
     });
   }
+
+  componentDidUpdate = (prevProps) => {
+      // console.log(this.prevProps);
+      // console.log(this.props);
+    }
+
+
+  resetInput = (e) => {
+      const value = String(e.key).length === 1 ? e.key : '';
+      const {
+        answer, removeCurrentAnswer, answerUrl, frontEndUniqueKey, removeCurrentSet
+      } = this.props;
+      if (answer.prePopulated) {
+        // this.setState({ inputValue: value, hasReset: true });
+        removeCurrentAnswer({ answerUrl, frontEndUniqueKey, answer });
+        // this.handleClick();
+      }
+    };
+
+
+  handleInputChange = (value) => {
+    this.setState({ inputValue: value });
+      // const { hasReset } = this.state;
+      // if (!hasReset) {
+      //   this.setState({ inputValue: value });
+      // } else {
+      //   this.setState({ hasReset: false });
+      // }
+    }
+
+  handleKeyDown = async (event, inputValue) => {
+      const { isClicked } = this.state;
+      const { mapType } = this.props;
+      if (!isClicked) {
+        console.log(event.target,'llooo')
+        this.resetInput(event);
+        this.setState({ isClicked: true });
+      }
+      if (isClicked && (event.keyCode === KEY_CODE_FOR_ENTER) && inputValue.length >= 3) {
+        const { source } = this.props;
+        const options = await queryAnswers(source, inputValue, mapType);
+        this.setState({ options, isVisible: true });
+      } else if (isClicked && (event.keyCode === KEY_CODE_FOR_ENTER) && (inputValue.length < 3)) {
+        notify.show(MIN_CHARACTERS_WARNING, 'error', MILLISECONDS_TO_SHOW_WARNING);
+        this.setState({ isVisible: false });
+      } else if (isClicked && event.keyCode === KEY_CODE_FOR_ESCAPE) {
+        this.setState({ isVisible: false });
+      }
+    }
+
+  handleSelect = (res) => {
+      const { handleAsyncSelectChange, frontEndUniqueKey } = this.props;
+      this.setState({ isVisible: false, inputValue: res.label });
+      handleAsyncSelectChange(res, frontEndUniqueKey);
+    };
+
 
   handleChangeInSource = (event) => {
     const newSource = event.target.value;
@@ -30,9 +99,10 @@ class AnswerRow extends React.Component {
   }
 
   handleClick = () => {
-    if (!this.state.isClicked) {
+    console.log('ll');
+    if (!this.state.sourceClicked) {
       this.setState({
-        isClicked: true,
+        sourceClicked: true,
         isEditing: false,
         isPrePopulated: false,
       });
@@ -63,7 +133,7 @@ class AnswerRow extends React.Component {
       answer,
       mapType,
     } = this.props;
-    const { source, isEditing, isPrePopulated } = this.state;
+    const { source, isEditing, isPrePopulated, inputValue, isVisible, options } = this.state;
     return (
       <tr>
         <td>
@@ -102,11 +172,18 @@ class AnswerRow extends React.Component {
               source={source}
               frontEndUniqueKey={frontEndUniqueKey}
               isShown={false}
-              defaultValue={toConceptName}
+              // defaultValue={toConceptName}
               removeCurrentAnswer={removeCurrentAnswer}
               answer={answer}
               answerUrl={answerUrl}
               mapType={mapType}
+              handleClick={this.handleClick}
+              inputValue={inputValue}
+              handleInputChange={this.handleInputChange}
+              handleKeyDown={this.handleKeyDown}
+              handleSelect={this.handleSelect}
+              isVisible={isVisible}
+              options={options}
             />
         }
         </td>
@@ -148,7 +225,7 @@ AnswerRow.propTypes = {
   removeCurrentAnswer: PropTypes.func.isRequired,
   currentDictionaryName: PropTypes.string,
   answer: PropTypes.object.isRequired,
-  mapType: PropTypes.string,
+  mapType: PropTypes.string.isRequired,
 };
 
 AnswerRow.defaultProps = {
@@ -160,7 +237,6 @@ AnswerRow.defaultProps = {
   toSourceName: '',
   currentDictionaryName: '',
   frontEndUniqueKey: 'unique',
-  mapType: MAP_TYPE.questionAndAnswer,
 };
 
 

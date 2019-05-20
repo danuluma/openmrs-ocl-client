@@ -26,6 +26,7 @@ import {
   addSelectedSetsToState,
   removeSelectedSet,
   addNewSetRow,
+  unpopulateSet
 } from '../../../redux/actions/concepts/dictionaryConcepts';
 import {
   INTERNAL_MAPPING_DEFAULT_SOURCE, CIEL_SOURCE_URL, MAP_TYPE, ATTRIBUTE_NAME_SOURCE,
@@ -233,6 +234,7 @@ export class EditConcept extends Component {
     const retired = mappings.filter(mapping => mapping.retired);
     const freshMappings = mappings.filter(mapping => mapping.isNew);
     const editedAns = this.editedAnswers;
+    console.log(editedAns); 
     editedAns.forEach((answer) => {
       const data = {
         references: [answer],
@@ -506,6 +508,7 @@ export class EditConcept extends Component {
   handleSetAsyncSelectChange = (sets, uniqueKey) => {
     const { addSelectedSets, selectedSets } = this.props;
     addSelectedSets(sets, uniqueKey);
+    console.log(selectedSets)
 
     const setsToAdd = selectedSets
       .filter(set => set.map_type === MAP_TYPE.conceptSet)
@@ -550,6 +553,7 @@ export class EditConcept extends Component {
   }
 
   removeCurrentAnswer = (info) => {
+    // console.log('ans', info);
     const { unPopulateAnswer } = this.props;
     this.editedAnswers = [...this.editedAnswers, info.answerUrl];
     this.removeUnsavedMappingRow(info.answerUrl);
@@ -570,6 +574,14 @@ export class EditConcept extends Component {
     }
     removeSet(uniqueKey);
     return true;
+  };
+
+  removeCurrentSet = (info) => {
+    // console.log('set', info);
+    const { unpopulateCurrentSet } = this.props;
+    this.editedAnswers = [...this.editedAnswers, info.answerUrl];
+    this.removeUnsavedMappingRow(info.answerUrl);
+    unpopulateCurrentSet(info.answer);
   };
 
   render() {
@@ -658,6 +670,7 @@ Concept
                 selectedSets={selectedSets}
                 removeSetRow={this.removeSetRow}
                 addSetRow={this.addSetRow}
+                removeCurrentSet={this.removeCurrentSet}
               />
               )
               }
@@ -741,6 +754,7 @@ export default connect(
     createNewAnswerRow: addNewAnswerRow,
     createNewSetRow: addNewSetRow,
     unPopulateAnswer: unPopulateThisAnswer,
+    unpopulateCurrentSet: unpopulateSet,
     addReferenceToCollection: addReferenceToCollectionAction,
     deleteReferenceFromCollection: deleteReferenceFromCollectionAction,
   },

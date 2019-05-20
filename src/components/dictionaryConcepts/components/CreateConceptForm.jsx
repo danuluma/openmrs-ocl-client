@@ -33,6 +33,7 @@ const CreateConceptForm = (props) => {
     removeMappingRow,
     updateAsyncSelectValue,
     removeCurrentAnswer,
+    removeCurrentSet,
   } = props;
 
   const selectedMappings = mappings.filter(
@@ -214,6 +215,7 @@ const CreateConceptForm = (props) => {
                 currentDictionaryName={currentDictionaryName}
                 isEditConcept={isEditConcept}
                 mapType={MAP_TYPE.conceptSet}
+                removeCurrentSet={removeCurrentSet}
               />
               <button
                 type="button"
@@ -236,6 +238,7 @@ const CreateConceptForm = (props) => {
                 removeAnswerRow={removeAnswerRow}
                 currentDictionaryName={currentDictionaryName}
                 isEditConcept={isEditConcept}
+                mapType={MAP_TYPE.questionAndAnswer}
                 removeCurrentAnswer={removeCurrentAnswer}
               />
               <button
@@ -345,6 +348,7 @@ CreateConceptForm.propTypes = {
   currentDictionaryName: PropTypes.string,
   removeCurrentAnswer: PropTypes.func,
   description: PropTypes.array,
+  removeCurrentSet: PropTypes.func,
 };
 
 CreateConceptForm.defaultProps = {
@@ -371,6 +375,7 @@ CreateConceptForm.defaultProps = {
   currentDictionaryName: '',
   removeCurrentAnswer: () => {},
   description: [],
+  removeCurrentSet: () => {},
 };
 
 export default CreateConceptForm;

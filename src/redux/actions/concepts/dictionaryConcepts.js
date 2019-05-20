@@ -35,7 +35,9 @@ import {
   ADD_NEW_SET_ROW,
   REMOVE_SELECTED_SET,
   ADD_SELECTED_SETS,
-  PRE_POPULATE_SETS, UNPOPULATE_PRE_POPULATED_SETS,
+  PRE_POPULATE_SETS,
+  UNPOPULATE_PRE_POPULATED_SETS,
+  UNPOPULATE_SET,
 } from '../types';
 import {
   isFetching,
@@ -296,6 +298,17 @@ export const unPopulateThisAnswer = (answer) => {
   };
   return {
     type: UN_POPULATE_THIS_ANSWER,
+    payload: newAns,
+  };
+};
+
+export const unpopulateSet = (answer) => {
+  const newAns = {
+    ...answer,
+    prePopulated: false,
+  };
+  return {
+    type: UNPOPULATE_SET,
     payload: newAns,
   };
 };
