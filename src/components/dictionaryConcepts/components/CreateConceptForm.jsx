@@ -205,7 +205,7 @@ const CreateConceptForm = (props) => {
         {(isSetConcept(props.concept.toString().trim()) || !concept) && (
           <div className="form-group set">
             <div className="row col-12 custom-concept-list">
-              <h6 className="text-left section-header">Sets</h6>
+              <h5 className="text-left section-header">Sets</h5>
               <AnswersTable
                 handleAsyncSelectChange={handleSetAsyncSelectChange}
                 selectedAnswers={selectedSets}
