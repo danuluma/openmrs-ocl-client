@@ -234,7 +234,6 @@ export class EditConcept extends Component {
     const retired = mappings.filter(mapping => mapping.retired);
     const freshMappings = mappings.filter(mapping => mapping.isNew);
     const editedAns = this.editedAnswers;
-    console.log(editedAns); 
     editedAns.forEach((answer) => {
       const data = {
         references: [answer],
@@ -508,7 +507,6 @@ export class EditConcept extends Component {
   handleSetAsyncSelectChange = (sets, uniqueKey) => {
     const { addSelectedSets, selectedSets } = this.props;
     addSelectedSets(sets, uniqueKey);
-    console.log(selectedSets)
 
     const setsToAdd = selectedSets
       .filter(set => set.map_type === MAP_TYPE.conceptSet)
@@ -553,11 +551,16 @@ export class EditConcept extends Component {
   }
 
   removeCurrentAnswer = (info) => {
-    // console.log('ans', info);
-    const { unPopulateAnswer } = this.props;
-    this.editedAnswers = [...this.editedAnswers, info.answerUrl];
-    this.removeUnsavedMappingRow(info.answerUrl);
-    unPopulateAnswer(info.answer);
+    const { answer, answer: { map_type }, answerUrl } = info;
+    const { unPopulateAnswer, unpopulateCurrentSet } = this.props;
+    this.editedAnswers = [...this.editedAnswers, answerUrl];
+    this.removeUnsavedMappingRow(answerUrl);
+    if ( map_type === 'Q-AND-A' ){
+      unPopulateAnswer(answer);
+    }
+    else if ( map_type === 'CONCEPT-SET' ){
+      unpopulateCurrentSet(answer);
+    }
   };
 
   removeSetRow = (uniqueKey, editing, url, name, prePopulated) => {
@@ -576,13 +579,6 @@ export class EditConcept extends Component {
     return true;
   };
 
-  removeCurrentSet = (info) => {
-    // console.log('set', info);
-    const { unpopulateCurrentSet } = this.props;
-    this.editedAnswers = [...this.editedAnswers, info.answerUrl];
-    this.removeUnsavedMappingRow(info.answerUrl);
-    unpopulateCurrentSet(info.answer);
-  };
 
   render() {
     const {

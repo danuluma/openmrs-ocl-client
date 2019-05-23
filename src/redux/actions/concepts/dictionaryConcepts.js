@@ -305,7 +305,7 @@ export const unPopulateThisAnswer = (answer) => {
 export const unpopulateSet = (answer) => {
   const newAns = {
     ...answer,
-    prePopulated: false,
+    edited: true,
   };
   return {
     type: UNPOPULATE_SET,

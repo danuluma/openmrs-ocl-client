@@ -348,7 +348,7 @@ export default (state = initialState, action) => {
     }
 
     case UNPOPULATE_SET: {
-      const newSets = updatePopulatedAnswers(action.payload, state.selectedAnswers);
+      const newSets = updatePopulatedAnswers(action.payload, state.selectedSets);
       return {
         ...state,
         selectedSets: newSets,

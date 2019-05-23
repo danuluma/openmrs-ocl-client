@@ -215,7 +215,7 @@ const CreateConceptForm = (props) => {
                 currentDictionaryName={currentDictionaryName}
                 isEditConcept={isEditConcept}
                 mapType={MAP_TYPE.conceptSet}
-                removeCurrentSet={removeCurrentSet}
+                removeCurrentAnswer={removeCurrentAnswer}
               />
               <button
                 type="button"

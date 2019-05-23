@@ -34,54 +34,46 @@ class AnswerRow extends React.Component {
     });
   }
 
-  componentDidUpdate = (prevProps) => {
-      // console.log(this.prevProps);
-      // console.log(this.props);
+  resetConceptInput = (e) => {
+    const value = String(e.key).length === 1 ? e.key : '';
+    const {
+      answer, removeCurrentAnswer, answerUrl, frontEndUniqueKey, removeCurrentSet
+    } = this.props;
+    if (answer.prePopulated) {
+      this.setState({ inputValue: value, hasReset: true });
+      removeCurrentAnswer({ answerUrl, frontEndUniqueKey, answer });
+      this.handleClick();
     }
-
-
-  resetInput = (e) => {
-      const value = String(e.key).length === 1 ? e.key : '';
-      const {
-        answer, removeCurrentAnswer, answerUrl, frontEndUniqueKey, removeCurrentSet
-      } = this.props;
-      if (answer.prePopulated) {
-        // this.setState({ inputValue: value, hasReset: true });
-        removeCurrentAnswer({ answerUrl, frontEndUniqueKey, answer });
-        // this.handleClick();
-      }
-    };
+  };
 
 
   handleInputChange = (value) => {
-    this.setState({ inputValue: value });
-      // const { hasReset } = this.state;
-      // if (!hasReset) {
-      //   this.setState({ inputValue: value });
-      // } else {
-      //   this.setState({ hasReset: false });
-      // }
+      const { hasReset } = this.state;
+      if (!hasReset) {
+        this.setState({ inputValue: value });
+      } else {
+        this.setState({ hasReset: false });
+      }
     }
 
   handleKeyDown = async (event, inputValue) => {
-      const { isClicked } = this.state;
-      const { mapType } = this.props;
-      if (!isClicked) {
-        console.log(event.target,'llooo')
-        this.resetInput(event);
-        this.setState({ isClicked: true });
-      }
-      if (isClicked && (event.keyCode === KEY_CODE_FOR_ENTER) && inputValue.length >= 3) {
-        const { source } = this.props;
-        const options = await queryAnswers(source, inputValue, mapType);
-        this.setState({ options, isVisible: true });
-      } else if (isClicked && (event.keyCode === KEY_CODE_FOR_ENTER) && (inputValue.length < 3)) {
-        notify.show(MIN_CHARACTERS_WARNING, 'error', MILLISECONDS_TO_SHOW_WARNING);
-        this.setState({ isVisible: false });
-      } else if (isClicked && event.keyCode === KEY_CODE_FOR_ESCAPE) {
-        this.setState({ isVisible: false });
-      }
+    const { isClicked } = this.state;
+    const { mapType } = this.props;
+    if (!isClicked) {
+      this.resetConceptInput(event);
+      this.setState({ isClicked: true });
     }
+    if (isClicked && (event.keyCode === KEY_CODE_FOR_ENTER) && inputValue.length >= 3) {
+      const { source } = this.props;
+      const options = await queryAnswers(source, inputValue, mapType);
+      this.setState({ options, isVisible: true });
+    } else if (isClicked && (event.keyCode === KEY_CODE_FOR_ENTER) && (inputValue.length < 3)) {
+      notify.show(MIN_CHARACTERS_WARNING, 'error', MILLISECONDS_TO_SHOW_WARNING);
+      this.setState({ isVisible: false });
+    } else if (isClicked && event.keyCode === KEY_CODE_FOR_ESCAPE) {
+      this.setState({ isVisible: false });
+    }
+  }
 
   handleSelect = (res) => {
       const { handleAsyncSelectChange, frontEndUniqueKey } = this.props;
@@ -92,14 +84,13 @@ class AnswerRow extends React.Component {
 
   handleChangeInSource = (event) => {
     const newSource = event.target.value;
-    this.resetInput(event);
+    this.resetConceptInput(event);
     this.setState({
       source: newSource,
     });
   }
 
   handleClick = () => {
-    console.log('ll');
     if (!this.state.sourceClicked) {
       this.setState({
         sourceClicked: true,
@@ -109,14 +100,6 @@ class AnswerRow extends React.Component {
     }
   }
 
-  resetInput = () => {
-    const {
-      answer, removeCurrentAnswer, answerUrl, frontEndUniqueKey,
-    } = this.props;
-    if (answer.prePopulated) {
-      removeCurrentAnswer({ answerUrl, frontEndUniqueKey, answer });
-    }
-  };
 
   render() {
     const {
@@ -172,12 +155,10 @@ class AnswerRow extends React.Component {
               source={source}
               frontEndUniqueKey={frontEndUniqueKey}
               isShown={false}
-              // defaultValue={toConceptName}
               removeCurrentAnswer={removeCurrentAnswer}
               answer={answer}
               answerUrl={answerUrl}
               mapType={mapType}
-              handleClick={this.handleClick}
               inputValue={inputValue}
               handleInputChange={this.handleInputChange}
               handleKeyDown={this.handleKeyDown}

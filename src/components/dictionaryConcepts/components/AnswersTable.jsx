@@ -43,8 +43,6 @@ const AnswersTable = (props) => {
               handleAsyncSelectChange={handleAsyncSelectChange}
               isEditConcept={isEditConcept}
               answer={ans}
-              // removeCurrentAnswer={() => console.log('hfbehjbc')}
-              removeCurrentSet={removeCurrentSet}
               removeCurrentAnswer={removeCurrentAnswer}
               mapType={mapType}
             />
