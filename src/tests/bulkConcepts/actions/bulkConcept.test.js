@@ -32,10 +32,11 @@ jest.mock('react-notify-toast');
 const mockStore = configureStore([thunk]);
 
 describe('Test suite for addBulkConcepts async actions', () => {
-
-  api.mappings.fetchFromPublicSources = jest.fn(() => ({ data: [] }));
+  const fetchFromPublicSourcesMock = jest.fn(() => ({ data: [] }));
   beforeEach(() => {
+    fetchFromPublicSourcesMock.mockClear();
     moxios.install(instance);
+    api.mappings.fetchFromPublicSources = fetchFromPublicSourcesMock;
   });
 
   afterEach(() => {

@@ -27,8 +27,17 @@ const props = {
 };
 
 describe('Test suite for dictionary modal', () => {
-  const wrapper = shallow(<DictionaryModal {...props} />);
-  const preventDefault = { preventDefault: jest.fn() };
+  let wrapper;
+  let preventDefault;
+
+  beforeEach(() => {
+    wrapper = shallow(<DictionaryModal {...props} />);
+    preventDefault = { preventDefault: jest.fn() };
+  });
+
+  afterEach(() => {
+    wrapper.unmount();
+  });
 
   it('should take a snapshot', () => {
     expect(wrapper).toMatchSnapshot();
@@ -60,11 +69,11 @@ describe('Test suite for dictionary modal', () => {
       ...props,
       organizations: [organizations],
     };
-    const wrap = shallow(<DictionaryModal {...newProps} />);
-    wrap
+    wrapper = shallow(<DictionaryModal {...newProps} />);
+    wrapper
       .find('#dictionary_name')
       .simulate('change', { target: { value: 'CIEL', name: 'name' } });
-    expect(wrap.state().data.name).toEqual('CIEL');
+    expect(wrapper.state().data.name).toEqual('CIEL');
   });
 
   it('it should handle change of supported locales option', () => {
@@ -167,11 +176,11 @@ describe('Test suite for dictionary modal', () => {
       userDictionaries: [],
       searchDictionaries: jest.fn(),
     };
-    const wrapper3 = shallow(<DictionaryModal {...newProps} />);
+    wrapper = shallow(<DictionaryModal {...newProps} />);
 
-    wrapper3.setState({
+    wrapper.setState({
       data: {
-        ...wrapper3.state().data,
+        ...wrapper.state().data,
         id: '1',
         preferred_source: 'CIEL',
         public_access: 'None',
@@ -185,8 +194,8 @@ describe('Test suite for dictionary modal', () => {
       errors: {},
     });
 
-    await wrapper3.instance().onSubmit(preventDefault);
-    expect(wrapper3.instance().state.errors).toEqual({});
+    await wrapper.instance().onSubmit(preventDefault);
+    expect(wrapper.instance().state.errors).toEqual({});
   });
 
   it('it should handle undefined submit error response', async () => {
@@ -213,11 +222,11 @@ describe('Test suite for dictionary modal', () => {
       userDictionaries: [],
       searchDictionaries: jest.fn(),
     };
-    const wrapper3 = shallow(<DictionaryModal {...newProps} />);
+    wrapper = shallow(<DictionaryModal {...newProps} />);
 
-    wrapper3.setState({
+    wrapper.setState({
       data: {
-        ...wrapper3.state().data,
+        ...wrapper.state().data,
         id: '1',
         preferred_source: 'CIEL',
         public_access: 'None',
@@ -231,18 +240,18 @@ describe('Test suite for dictionary modal', () => {
       errors: {},
     });
 
-    await wrapper3.instance().onSubmit(preventDefault);
-    expect(wrapper3.instance().state.errors).toEqual({});
+    await wrapper.instance().onSubmit(preventDefault);
+    expect(wrapper.instance().state.errors).toEqual({});
   });
 
   it('it should handle search input values', () => {
     props.isEditingDictionary = false;
-    const wrapper2 = mount(<DictionaryModal {...props} />);
-    const spy = jest.spyOn(wrapper2.find('DictionaryModal').instance(), 'searchInputValues');
-    wrapper2.find('input#react-select-3-input')
+    wrapper = mount(<DictionaryModal {...props} />);
+    const spy = jest.spyOn(wrapper.find('DictionaryModal').instance(), 'searchInputValues');
+    wrapper.find('input#react-select-3-input')
       .simulate('change');
     expect(spy).toHaveBeenCalledTimes(1);
-    wrapper2.instance().searchInputValues('dictionary');
+    wrapper.instance().searchInputValues('dictionary');
     expect(props.searchDictionaries).toBeCalled();
   });
 
@@ -271,5 +280,15 @@ describe('Test suite for dictionary modal', () => {
     const submitButtonWrapper = wrapper.find('#addDictionary');
     submitButtonWrapper.simulate('click', preventDefault);
     expect(wrapper.state().disableButton).toBeTruthy();
+  });
+
+  it('should set focus on the name input when the form to create a new dictionary is rendered', () => {
+    wrapper = mount(<DictionaryModal {...props} />);
+    const instance = wrapper.instance();
+    const spy = jest.spyOn(instance, 'focusInput');
+    expect(instance.state.inputFocus).toBe(false);
+    instance.forceUpdate();
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(instance.state.inputFocus).toBe(true);
   });
 });
