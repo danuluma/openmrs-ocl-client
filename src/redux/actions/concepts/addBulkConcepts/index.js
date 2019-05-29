@@ -39,7 +39,11 @@ export const fetchFilteredConcepts = (source = 'CIEL', query = '', currentPage =
     dispatch(isFetching(false));
   } catch (error) {
     dispatch(isFetching(false));
-    notify.show('An error occurred with your internet connection, please fix it and try reloading the page.', 'error', 3000);
+    notify.show(
+      'An error occurred with your internet connection, please fix it and try reloading the page.',
+      'error',
+      3000,
+    );
   }
 };
 
@@ -60,14 +64,15 @@ export const previewConcept = id => (dispatch, getState) => {
   return dispatch(isSuccess(payload[0], PREVIEW_CONCEPT));
 };
 
-
 export const recursivelyFetchConceptMappings = async (fromConceptCodes, levelsToCheck) => {
-  const startingConceptMappings = await api.mappings.fetchFromPublicSources(fromConceptCodes.join(','));
+  const startingConceptMappings = await api.mappings.fetchFromPublicSources(
+    fromConceptCodes.join(','),
+  );
+  console.log(fromConceptCodes, levelsToCheck);
+  console.log(startingConceptMappings);
   const mappingsList = [startingConceptMappings.data];
   for (let i = 0; i < levelsToCheck; i += 1) {
-    const toConceptCodes = mappingsList[i].map(
-      mapping => mapping.to_concept_code,
-    );
+    const toConceptCodes = mappingsList[i].map(mapping => mapping.to_concept_code);
     if (!toConceptCodes.length) break;
     const conceptMappings = await api.mappings.fetchFromPublicSources(toConceptCodes.join(','));
     mappingsList.push(conceptMappings.data);
@@ -79,8 +84,10 @@ export const addConcept = (params, data, conceptName, id) => async (dispatch) =>
   const { type, typeName, collectionName } = params;
   const url = `${type}/${typeName}/collections/${collectionName}/references/`;
   try {
+    console.log(recursivelyFetchConceptMappings([id], MAPPINGS_RECURSION_DEPTH));
     const referencesToAdd = await recursivelyFetchConceptMappings([id], MAPPINGS_RECURSION_DEPTH);
     data.data.expressions.push(...referencesToAdd);
+    console.log(referencesToAdd);
 
     const payload = await instance.put(url, data);
     dispatch(isSuccess(payload.data, ADD_EXISTING_CONCEPTS));

@@ -37,7 +37,7 @@ export const loadState = () => {
 
 const middlewares = [reduxThunk];
 const persistedState = loadState();
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development1') {
   middlewares.push(logger);
 }
 
