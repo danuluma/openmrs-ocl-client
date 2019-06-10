@@ -339,16 +339,27 @@ export const unpopulatePrepopulatedSets = () => (dispatch) => {
   });
 };
 
-export const addConceptToDictionary = (id, dataUrl) => async (dispatch) => {
+export const addConceptToDictionary = (
+  id,
+  dataUrl,
+  conceptMappings,
+) => async (dispatch) => {
+  const mappings = removeBlankMappings(conceptMappings);
+  const mappingsToAdd = mappings.map(map => `${map.sourceObject && map.sourceObject.url}concepts/${map.to_concept_code}/`);
   const newConcept = `${dataUrl}${id}/`;
   const urlConstruct = dataUrl.split('/');
   const userType = urlConstruct[1];
   const sourceName = urlConstruct[4];
   const username = urlConstruct[2];
   const data = { data: { expressions: [newConcept] } };
+  const mappingdata = { data: { expressions: mappingsToAdd } };
   const url = `${userType}/${username}/collections/${sourceName}/references/?cascade=sourcemappings`;
+  const addMappingUrl = `${userType}/${username}/collections/${sourceName}/references/`;
   try {
-    const response = await instance.put(url, data);
+    let response = await instance.put(url, data);
+    if (response.data) {
+      response = await instance.put(addMappingUrl, mappingdata);
+    }
     dispatch(isSuccess(response.data, ADD_CONCEPT_TO_DICTIONARY));
   } catch (error) {
     notify.show('An error occurred', 'error', 3000);
@@ -444,7 +455,8 @@ export const createNewConcept = (data, dataUrl) => async (dispatch) => {
     }
   } finally {
     if (createdConcept) {
-      await dispatch(addConceptToDictionary(createdConcept.id, dataUrl));
+      console.log(createdConcept, data);
+      await dispatch(addConceptToDictionary(createdConcept.id, dataUrl, removeBlankMappings(data.mappings)));
       dispatch(isSuccess(createdConcept, CREATE_NEW_CONCEPT));
     }
   }
@@ -517,10 +529,13 @@ export const updateConcept = (conceptUrl, data, history, source, concept, collec
     );
     // we delete all of this concept's mappings references in the collection
     // so we can take advantage of cascadeMappings when updating the concept in the collection later
-    await api.dictionaries.references.delete.fromACollection(
-      collectionUrl,
-      currentMappings.data.map(mapping => mapping.version_url),
-    );
+    const references = currentMappings.data.map(mapping => mapping.version_url);
+    if (references.length) {
+      await api.dictionaries.references.delete.fromACollection(
+        collectionUrl,
+        references,
+      );
+    }
 
     await CreateMapping(removeBlankMappings(data.mappings), concept.url, source);
     await UpdateMapping(removeBlankMappings(data.mappings));

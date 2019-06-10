@@ -768,3 +768,18 @@ export const conceptWithoutMappings = {
   ...sampleConcept,
   mappings: null,
 };
+
+export const newMockMapping = {
+  id: 1,
+  isNew: true,
+  map_type: 'SAME-AS',
+  retired: false,
+  source: null,
+  to_concept_name: null,
+  to_source_url: null,
+  url: '1234',
+  sourceObject: {
+    url: 'url/dann/1',
+  },
+  to_concept_code: 789,
+};

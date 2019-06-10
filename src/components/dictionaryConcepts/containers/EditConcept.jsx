@@ -214,14 +214,14 @@ export class EditConcept extends Component {
       deleteReferenceFromCollection,
       addReferenceToCollection,
     } = this.props;
+    const { mappings } = this.state;
     const conceptRef = dictionaryConcepts.find(c => c.id === concept.id);
-
     let response = await deleteReferenceFromCollection(type, typeName, collectionName, [
       conceptRef.version_url,
     ]);
     if (!response) return false;
 
-    response = await addReferenceToCollection(type, typeName, collectionName, [conceptRef.url]);
+    response = await addReferenceToCollection(type, typeName, collectionName, [conceptRef.url], mappings );
     if (!response) return false;
 
     return true;

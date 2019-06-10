@@ -38,8 +38,8 @@ export default {
         .get(`${data}`)
         .then(response => response.data),
 
-    addReferencesToCollection: (type, owner, collection, expressions) =>
-      instance.put(`${type}/${owner}/collections/${collection}/references/?cascade=sourcemappings`, {
+    addReferencesToCollection: (type, owner, collection, expressions, sourcemappings=true) =>
+      instance.put(`${type}/${owner}/collections/${collection}/references${sourcemappings ? '/?cascade=sourcemappings' : '/'}`, {
         data: { expressions }
       }),
 
@@ -82,6 +82,7 @@ export default {
     instance
       .put(url, data)
       .then(response => response.data),
+
     references: {
           delete: {
             fromACollection: (collectionUrl, references) => instance.delete(`${collectionUrl}references/`, { data: { references }}),

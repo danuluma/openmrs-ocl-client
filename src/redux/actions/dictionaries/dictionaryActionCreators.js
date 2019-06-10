@@ -18,7 +18,6 @@ import {
 import { filterPayload } from '../../reducers/util';
 import { addDictionaryReference } from '../bulkConcepts';
 import api from '../../api';
-import axiosInstance from '../../../config/axiosConfig';
 
 export const showNetworkError = () => (
   notify.show('Network Error. Please try again later!', 'error', 6000));
@@ -281,9 +280,17 @@ export const retireConcept = (conceptUrl, retire) => async (dispatch) => {
   }
 }
 
-export const addReferenceToCollectionAction = (type, owner, collection, expressions) => async (dispatch) => {
+export const addReferenceToCollectionAction = (type, owner, collection, expressions, mappings = null) =>  async(dispatch) =>{
+  let mappingsToAdd;
+  if(mappings) {
+    mappingsToAdd = mappings.map(map => `${map.sourceObject && map.sourceObject.url}concepts/${map.to_concept_code}/`);
+  }
   try {
-    return await api.dictionaries.addReferencesToCollection(type, owner, collection, expressions);
+    let response =  await api.dictionaries.addReferencesToCollection(type, owner, collection, expressions)
+    if(response.data[0].added){
+      response = await api.dictionaries.addReferencesToCollection(type, owner, collection, mappingsToAdd, false)
+    }
+    return response;
   } catch (e) {
     if(e && e.response && e.response.data){
       notify.show(e.response.data, 'error', 3000);
